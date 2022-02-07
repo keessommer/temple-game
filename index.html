@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne+Tactile&display=swap" rel="stylesheet"> 
+    <style>
+        :root{
+            --oceanColor: rgb(68, 68, 68);
+            --landColor: rgb(194, 110, 35);
+            --darkColor: #090926;
+            --lightColor: rgb(221, 217, 204);
+        }
+
+        body{
+            background-color: var(--oceanColor);
+            text-align: center;
+            font-family: 'Syne Tactile', cursive;        
+        }
+
+        table{
+            background-color: var(--darkColor);
+            width: 650px;
+            height: 650px;
+            max-width: 650px;
+            max-height: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 50px;
+            overflow: hidden;
+            border: 15px solid var(--darkColor);
+        }
+
+        td{
+            text-align: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+        }
+
+        td h3{
+            visibility: hidden;
+        }
+
+        .lit{
+            background-color: var(--landColor);
+        }
+
+        .lit h3{
+            visibility: unset;
+        }
+
+        h3{
+            padding: 0;
+            margin: 0;
+        }
+
+        .wall-background{
+            background-image: url("wallTile.png");
+            background-size: 20px;
+        }
+
+        h1, h2{
+            text-align: center;
+            color: var(--lightColor);
+        }
+        h2{
+            display: inline-block;
+            padding-right: 50px;
+        }
+        button{
+            display: inline-block;
+            font-size: 20px;
+            margin-bottom: 10px;
+            background-color: var(--darkColor);
+            color: var(--lightColor);
+            box-shadow: none;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        button:hover{
+            background-color: var(--lightColor);
+            color: var(--darkColor);
+        }
+
+        #levelCounter{
+            color: var(--landColor);
+        }
+    </style>
+</head>
+<body>
+    <h1>The Accursed Temple</h1>
+    <h1 id="levelCounter">Level 1</h1>
+    <h2 id="bankedScore">banked: 0</h2>
+    <h2 id="score">score: 0</h2>
+    <h2 id="nextCost">next key: 100</h2>
+    <button onclick="restart()">restart</button>
+    <div id = "mapContainer">
+        <table id="map">
+        </table>
+    </div>
+
+    <script>
+        function generateMap(){
+            const map = document.querySelector('#map');
+            map.innerHTML = '';
+            mapBackEnd = [];
+            playerY = parseInt(rowAmount/2);
+            playerX = parseInt(columnAmount/2);
+
+            for (let i = 0; i < rowAmount; i++) {
+                let rowHtml = '';
+                let mapBackEndRow = [];
+                for (let j = 0; j < columnAmount; j++) {
+                    const tileTypes = ['🪙', 'wall', ''];
+                    let value = tileTypes[parseInt(Math.random() * tileTypes.length)];
+                    const emptyCells = [];
+                    const horizontalOptions = [playerX, playerX - 1, playerX + 1];
+                    const verticalOptions = [playerY, playerY - 1, playerY + 1];
+                    horizontalOptions.forEach( (horizontalOption) => {
+                        verticalOptions.forEach( (verticalOption) => {
+                            emptyCells.push([horizontalOption, verticalOption])
+                        }) 
+                    })
+                    
+                    emptyCells.forEach((entry) =>{
+                        if (entry[0] == i && entry[1] == j){
+                            value = ''
+                        }
+                    })
+                    if (i == playerY && j == playerX){
+                        value = '⛩️';
+                    }
+                    
+                    mapBackEndRow.push(value)
+                    const cellHtml = `<td${value == 'wall' ? ' class="wall-background"': ''}
+                            onclick="clickMap(event)"><h3>${value == 'wall' ? '' : value}</h3></td>`;
+                    rowHtml += cellHtml;
+                }
+                mapBackEnd.push(mapBackEndRow);
+                map.innerHTML += rowHtml;
+            }
+        }
+
+        function revealCells(){
+            const visibleCells = [];
+            const horizontalOptions = [playerX, playerX - 2, playerX - 1, playerX + 1, playerX + 2];
+            const verticalOptions = [playerY, playerY - 2, playerY - 1, playerY + 1, playerY + 2];
+            horizontalOptions.forEach( (horizontalOption) => {
+                verticalOptions.forEach( (verticalOption) => {
+                    visibleCells.push([horizontalOption, verticalOption])
+                }) 
+            })
+            visibleCells.forEach( (entry) => {
+                const row = map.rows[entry[1]]
+                if (row){
+                    const cell = row.cells[entry[0]];
+                    if (cell){
+                        cell.classList.add("lit");
+                    }
+                }
+            });
+        }
+
+        function drawMap(){
+            for (let i = 0; i < rowAmount; i++) {
+                for (let j = 0; j < columnAmount; j++) {
+                    const value = mapBackEnd[i][j]
+                    map.rows[i].cells[j].firstChild.innerHTML = value == 'wall' ? '' : value;
+                }
+            }
+            map.rows[playerY].cells[playerX].firstChild.innerHTML = '🤠';
+        };
+
+        function clickMap(event){
+            const target = event.target.closest('td');
+            const targetX = target.cellIndex;
+            const targetY = target.closest('tr').rowIndex;
+            let canTravel = false;
+            [[playerX, playerY+1], [playerX+1, playerY], [playerX, playerY-1], [playerX-1, playerY]]
+            .forEach((entry) => {
+                if (targetX == entry[0] && targetY == entry[1]){
+                    canTravel = true;
+                }
+            })
+            if ( canTravel && !['wall', '💥'].includes(mapBackEnd[targetY][targetX])){
+                mapBackEnd[playerY][playerX] = mapBackEnd[playerY][playerX] == '⛩️' ? '⛩️' : '💥';
+                switch(mapBackEnd[targetY][targetX]){
+                    case '🪙':
+                        coinCounter++;
+                        score = Math.pow(coinCounter,2);
+                        updateScore();
+                        break;
+                    case '⛩️':
+                        bankedScore += score * multiplier;
+                        if (bankedScore >= nextCost){
+                            if (window.confirm(`Click "confirm" to buy a key for ${nextCost}\ and travel deeper for higher rewards, or click "cancel" to pocket your ${bankedScore} and return to the surface.`)){
+                                nextLevel();
+                                break;
+                            }
+                            window.alert(`Congratulations! You have survived the temple and earned ${bankedScore}!`);
+                            restart();
+                            break;
+                        }
+                        window.alert(`Since you didn't find enough to buy the key for ${nextCost} to travel deeper, you pocket your ${bankedScore} and return to the surface.`);
+                        restart();
+                        break;
+                }
+                playerX = targetX;
+                playerY = targetY;
+                drawMap();
+                revealCells();
+            }
+        }
+
+        function updateScore(){
+            document.querySelector('#score').innerHTML = `score: ${score} * ${multiplier} = ${score * multiplier}`;
+            document.querySelector('#bankedScore').innerHTML = `banked: ${bankedScore}`;
+            document.querySelector('#nextCost').innerHTML = `next key: ${nextCost}`;
+            document.querySelector('#levelCounter').innerHTML = `Level ${multiplier}`;
+            const r = document.querySelector(':root');
+            r.style.setProperty('--landColor',`rgb(194, ${Math.max(110 - 20 * multiplier, 0)}, 35)`);
+        }
+
+        function restart(){
+            nextLevel();
+            bankedScore = 0;
+            multiplier = 1;
+            nextCost = 100;
+            updateScore();
+        }
+
+        function nextLevel(){
+            bankedScore = Math.max(0, bankedScore -100 * multiplier);
+            multiplier++;
+            coinCounter = 0;
+            score = 0;
+            nextCost = 100 * multiplier;
+            generateMap();
+            revealCells();
+            drawMap();
+            updateScore();
+
+        }
+
+        const columnAmount = 11;
+        const rowAmount = 11;
+        let mapBackEnd = [];
+        let playerY, playerX;
+        let coinCounter = 0, score = 0, bankedScore = 0, multiplier = 0, nextCost = 0;
+        nextLevel();
+        window.alert('You have entered the accursed temple!\n\
+Collect coins and return to the gate to travel deeper or pocket your treasures. \
+But beware! The temple crumbles beneath your feet!');
+
+    </script>
+</body>
+</html>
