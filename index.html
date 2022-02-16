@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🪙 The Shattering Tomb 🪙</title>
+    <title>🪙 De Kerkers van Fort Constance 🪙</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Syne+Tactile&display=swap" rel="stylesheet"> 
@@ -67,10 +67,12 @@
         h1, h2{
             text-align: center;
             color: var(--lightColor);
+            margin: 0.5em;
         }
         h2{
             display: inline-block;
             padding-right: 50px;
+            font-family: Arial, Helvetica, sans-serif;
         }
         button{
             display: inline-block;
@@ -92,15 +94,27 @@
         #levelCounter{
             color: var(--landColor);
         }
+
+        ul{
+            margin-top: 0.2em;
+            font-family: Arial, Helvetica, sans-serif;
+            color: var(--lightColor);
+        }
     </style>
 </head>
 <body>
-    <h1>The Shattering Tomb</h1>
+    <h1>De Kerkers van Fort Constance</h1>
     <h1 id="levelCounter">Level 1</h1>
-    <h2 id="bankedScore">banked: 0</h2>
-    <h2 id="score">score: 0</h2>
-    <h2 id="nextCost">next key: 100</h2>
-    <button onclick="restart()">restart</button>
+    <h2 id="bankedScore">totale score: 0</h2>
+    <h2 id="score">level score: 0</h2>
+    <h2 id="nextCost">volgende sleutel: 100</h2>
+    <button onclick="restart()">opnieuw beginnen</button>
+    <ul>
+        <li>Verzamel munten om je score te verhogen.</li>
+        <li>De vloer stort onder je voeten in.</li>
+        <li>Keer terug naar de poort om verder te reizen of je winst te incasseren.</li>
+        <li>Stuur een screenshot van je uiteindelijke score om de punten te innen.</li>
+    </ul>
     <div id = "mapContainer">
         <table id="map">
         </table>
@@ -200,15 +214,18 @@
                     case '⛩️':
                         bankedScore += score * multiplier;
                         if (bankedScore >= nextCost){
-                            if (window.confirm(`Click "confirm" to buy a key for ${nextCost}\ and travel deeper for higher rewards, or click "cancel" to pocket your ${bankedScore} and return to the surface.`)){
+                            if (window.confirm(`Klik op "ok" om een sleutel te kopen voor de volgende verdieping voor ${nextCost},\
+ of klik op "cancel" om ${bankedScore} aan munten te incasseren.`)){
                                 nextLevel();
                                 break;
                             }
-                            window.alert(`Congratulations! You have survived the temple and earned ${bankedScore}!`);
+                            window.alert(`Gefeliciteerd!\n\nJe hebt de kerkers overleefd en ${bankedScore} verdiend!\n\n\
+Stuur een screenshot van dit bericht.`);
                             restart();
                             break;
                         }
-                        window.alert(`Since you didn't find enough to buy the key for ${nextCost} to travel deeper, you pocket your ${bankedScore} and return to the surface.`);
+                        window.alert(`Omdat je minder dan ${nextCost} hebt verdiend heb je niet genoeg om een sleutel te kopen voor de volgende verdieping.\ 
+Je incasseert de ${bankedScore} aan munten en keert terug naar het oppervlak.\n\nStuur een screenshot van dit bericht.`);
                         restart();
                         break;
                 }
@@ -220,9 +237,9 @@
         }
 
         function updateScore(){
-            document.querySelector('#score').innerHTML = `score: ${score} * ${multiplier} = ${score * multiplier}`;
-            document.querySelector('#bankedScore').innerHTML = `banked: ${bankedScore}`;
-            document.querySelector('#nextCost').innerHTML = `next key: ${nextCost}`;
+            document.querySelector('#score').innerHTML = `level score: ${score} * ${multiplier} = ${score * multiplier}`;
+            document.querySelector('#bankedScore').innerHTML = `totale score: ${bankedScore}`;
+            document.querySelector('#nextCost').innerHTML = `volgende sleutel: ${nextCost}`;
             document.querySelector('#levelCounter').innerHTML = `Level ${multiplier}`;
             const r = document.querySelector(':root');
             r.style.setProperty('--landColor',`rgb(194, ${Math.max(110 - 20 * multiplier, 0)}, 35)`);
@@ -255,9 +272,9 @@
         let playerY, playerX;
         let coinCounter = 0, score = 0, bankedScore = 0, multiplier = 0, nextCost = 0;
         nextLevel();
-        window.alert('You have entered the Shattering Tomb!\n\
-Collect coins and return to the gate to travel deeper or pocket your treasures. \
-But beware! The temple crumbles beneath your feet!');
+        window.alert('Je betreedt de kerkers van Fort Constance!\n\n\
+Verzamel munten en keer terug naar de poort om verder te reizen of je winst te incasseren. \
+Maar kijk uit! De kerker stort onder je voeten ineen.');
 // test change
     </script>
 </body>
